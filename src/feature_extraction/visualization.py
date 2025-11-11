@@ -202,28 +202,28 @@ class DataVisualizer:
             fontsize=14, fontweight='bold'
         )
 
-        # SIF 分布
-        sif_counts = np.bincount(self.y_sif)
-        axes[0].bar(np.arange(len(sif_counts)), sif_counts, color='steelblue',
+        # SIF 分布 - 使用 unique 获取实际存在的标签
+        sif_unique, sif_counts = np.unique(self.y_sif.astype(int), return_counts=True)
+        axes[0].bar(sif_unique, sif_counts, color='steelblue',
                    edgecolor='black', alpha=0.7)
         axes[0].set_xlabel('SIF Stability Class')
         axes[0].set_ylabel('Count')
         axes[0].set_title('SIF Distribution')
-        axes[0].set_xticks(np.arange(len(sif_counts)))
-        for i, v in enumerate(sif_counts):
-            axes[0].text(i, v + 5, str(v), ha='center', fontweight='bold')
+        axes[0].set_xticks(sif_unique)
+        for cls, v in zip(sif_unique, sif_counts):
+            axes[0].text(cls, v + 5, str(v), ha='center', fontweight='bold')
         axes[0].grid(True, alpha=0.3, axis='y')
 
-        # SGF 分布
-        sgf_counts = np.bincount(self.y_sgf)
-        axes[1].bar(np.arange(len(sgf_counts)), sgf_counts, color='coral',
+        # SGF 分布 - 使用 unique 获取实际存在的标签
+        sgf_unique, sgf_counts = np.unique(self.y_sgf.astype(int), return_counts=True)
+        axes[1].bar(sgf_unique, sgf_counts, color='coral',
                    edgecolor='black', alpha=0.7)
         axes[1].set_xlabel('SGF Stability Class')
         axes[1].set_ylabel('Count')
         axes[1].set_title('SGF Distribution')
-        axes[1].set_xticks(np.arange(len(sgf_counts)))
-        for i, v in enumerate(sgf_counts):
-            axes[1].text(i, v + 5, str(v), ha='center', fontweight='bold')
+        axes[1].set_xticks(sgf_unique)
+        for cls, v in zip(sgf_unique, sgf_counts):
+            axes[1].text(cls, v + 5, str(v), ha='center', fontweight='bold')
         axes[1].grid(True, alpha=0.3, axis='y')
 
         plt.tight_layout()

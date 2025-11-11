@@ -138,6 +138,18 @@ def generate_visualizations_for_file(
         # 获取数据集名称（不含后缀）
         dataset_name = npz_path.stem
 
+        # 如果是 sif_sgf_second（包括带 _cleaned 后缀），将标签中的 5 转为 4
+        if 'sif_sgf_second' in dataset_name:
+            logger.info("检测到 sif_sgf_second 数据集，将标签中的 5 转为 4...")
+            y_sif_before = np.unique(y_sif)
+            y_sgf_before = np.unique(y_sgf)
+            
+            y_sif = np.where(y_sif == 5, 4, y_sif)
+            y_sgf = np.where(y_sgf == 5, 4, y_sgf)
+            
+            logger.info(f"转换前 - y_sif: {y_sif_before}, y_sgf: {y_sgf_before}")
+            logger.info(f"转换后 - y_sif: {np.unique(y_sif)}, y_sgf: {np.unique(y_sgf)}")
+
         # 创建可视化器
         visualizer = DataVisualizer(
             X=X,
