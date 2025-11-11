@@ -9,7 +9,7 @@ CSV 数据清理脚本。
 
 import logging
 from pathlib import Path
-from typing import Optional
+from typing import Any
 
 import pandas as pd
 
@@ -22,7 +22,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-def convert_star_to_number(value: str) -> Optional[int]:
+def convert_star_to_number(value: Any) -> Any:
     """
     将星号标记转换为数字。
     
@@ -59,24 +59,26 @@ def convert_star_to_number(value: str) -> Optional[int]:
         return pd.NA
 
 
-def replace_dash_with_nan(value: str) -> Optional[str]:
+def replace_dash_with_nan(value: Any) -> Any:
     """
-    将 '---' 占位符替换为空值。
+    将短横线占位符替换为空值。
     
-    如果值为 '---'，则返回 NaN；否则返回原值。
+    如果值全由短横线组成（至少3个），则返回 NaN；否则返回原值。
+    例如：'---', '----', '-----' 等都会被替换为空值。
     
     Args:
         value (str): 输入值。
     
     Returns:
-        Optional[str]: 如果是 '---' 则返回 NaN，否则返回原值。
+        Optional[str]: 如果是短横线占位符则返回 NaN，否则返回原值。
     """
     if pd.isna(value):
         return value
     
     value_str = str(value).strip()
     
-    if value_str == '---':
+    # 检查是否全由短横线组成且长度至少为3
+    if value_str and len(value_str) >= 3 and all(c == '-' for c in value_str):
         return pd.NA
     
     return value
@@ -102,7 +104,7 @@ def remove_empty_columns(df: pd.DataFrame) -> pd.DataFrame:
     
     logger.info(f"删除了 {len(df.columns) - len(non_empty_columns)} 个空列，保留了 {len(non_empty_columns)} 个非空列")
     
-    return df[non_empty_columns]
+    return df[non_empty_columns]  # type: ignore[return-value]
 
 
 def clean_us9624268(input_path: Path, output_path: Path) -> None:
@@ -189,13 +191,18 @@ def main() -> None:
     主函数，执行两个 CSV 文件的清理操作。
     """
     # 定义文件路径
-    base_dir = Path(__file__).parent
+    # 脚本位于 scripts/ 目录，需要回到项目根目录
+    project_root = Path(__file__).parent.parent
     
-    us9624268_input = base_dir / "US9624268.csv"
-    us9624268_output = base_dir / "US9624268_cleaned.csv"
+    us9624268_input = project_root / "data" / "raw" / "US9624268.csv"
+    us9624268_output = project_root / "data" / "cleaned" / "US9624268_cleaned.csv"
     
-    sif_sgf_second_input = base_dir / "sif_sgf_second.csv"
-    sif_sgf_second_output = base_dir / "sif_sgf_second_cleaned.csv"
+    sif_sgf_second_input = project_root / "data" / "raw" / "sif_sgf_second.csv"
+    sif_sgf_second_output = project_root / "data" / "cleaned" / "sif_sgf_second_cleaned.csv"
+    
+    # 确保输出目录存在
+    us9624268_output.parent.mkdir(parents=True, exist_ok=True)
+    sif_sgf_second_output.parent.mkdir(parents=True, exist_ok=True)
     
     try:
         # 清理 US9624268.csv
