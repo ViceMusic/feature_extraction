@@ -150,13 +150,39 @@ def clean_us9624268(input_path: Path, output_path: Path) -> None:
     logger.info(f"已保存清理后的文件：{output_path}，包含 {len(df)} 行，{len(df.columns)} 列")
 
 
+def convert_five_to_four(value: Any) -> Any:
+    """
+    将值 5 转换为 4。
+    
+    如果值是数字 5（整数或浮点数），则转换为 4；否则返回原值。
+    
+    Args:
+        value: 输入值，可能是数字或其他类型。
+    
+    Returns:
+        如果值是 5 则返回 4，否则返回原值。
+    """
+    if pd.isna(value):
+        return value
+    
+    # 尝试转换为数字
+    try:
+        num_value = float(value)
+        if num_value == 5.0:
+            return 4.0
+        return num_value
+    except (ValueError, TypeError):
+        return value
+
+
 def clean_sif_sgf_second(input_path: Path, output_path: Path) -> None:
     """
     清理 sif_sgf_second.csv 文件。
     
     处理流程：
     1. 将 '---' 替换为空值
-    2. 删除所有空列
+    2. 将 SIF_class 和 SGF_class 列中的 5 转换为 4
+    3. 删除所有空列
     
     Args:
         input_path (Path): 输入文件路径。
@@ -177,6 +203,17 @@ def clean_sif_sgf_second(input_path: Path, output_path: Path) -> None:
     # 将 '---' 替换为 NaN
     df = df.map(replace_dash_with_nan)
     logger.info("已将 '---' 替换为空值")
+    
+    # 将 SIF_class 和 SGF_class 列中的 5 转换为 4
+    for col in ['SIF_class', 'SGF_class']:
+        if col in df.columns:
+            # 统计转换前的数量（使用 pd.to_numeric 进行安全转换）
+            numeric_col = pd.to_numeric(df[col], errors='coerce')
+            before_count = int((numeric_col == 5.0).sum())  # type: ignore[arg-type]
+            
+            df[col] = df[col].apply(convert_five_to_four)
+            if before_count > 0:
+                logger.info(f"已将 {col} 列中的 {before_count} 个值为 5 的项转换为 4")
     
     # 删除空列
     df = remove_empty_columns(df)
