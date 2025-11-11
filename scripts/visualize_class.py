@@ -53,15 +53,13 @@ LABEL_MAPPINGS = {
             1: '<1 hour',
             2: '1-1.5 hours',
             3: '1.5-2 hours',
-            4: '>2 hours',
-            5: 'Unknown'
+            4: '>2 hours'
         },
         'sgf_labels': {
             1: '<1 hour',
             2: '1-1.5 hours',
             3: '1.5-2 hours',
-            4: '>2 hours',
-            5: 'Unknown'
+            4: '>2 hours'
         }
     }
 }
@@ -226,20 +224,19 @@ def plot_class_distribution(
         sgf_labels_map = label_mapping.get('sgf_labels', {})
     
     # 绘制 SIF 分布
-    sif_counts = np.bincount(sif_classes.astype(int))
-    sif_classes_sorted = np.arange(len(sif_counts))
+    sif_unique, sif_counts = np.unique(sif_classes.astype(int), return_counts=True)
     
-    axes[0].bar(sif_classes_sorted, sif_counts, color='steelblue',
+    axes[0].bar(sif_unique, sif_counts, color='steelblue',
                edgecolor='black', alpha=0.7)
     
     # 构造 X 轴标签
     if sif_labels_map:
         sif_xticks = [f"{int(c)}\n{sif_labels_map.get(float(c), '')}" 
-                     for c in sif_classes_sorted]
+                     for c in sif_unique]
     else:
-        sif_xticks = [str(int(c)) for c in sif_classes_sorted]
+        sif_xticks = [str(int(c)) for c in sif_unique]
     
-    axes[0].set_xticks(sif_classes_sorted)
+    axes[0].set_xticks(sif_unique)
     axes[0].set_xticklabels(sif_xticks, fontsize=9)
     axes[0].set_xlabel('SIF Class', fontsize=11, fontweight='bold')
     axes[0].set_ylabel('Count', fontsize=11, fontweight='bold')
@@ -248,26 +245,25 @@ def plot_class_distribution(
     
     # 在柱状图上标注数值和百分比
     total_sif = sif_counts.sum()
-    for i, v in enumerate(sif_counts):
+    for cls, v in zip(sif_unique, sif_counts):
         percentage = (v / total_sif) * 100
-        axes[0].text(i, v + total_sif * 0.01, f'{int(v)}\n({percentage:.1f}%)',
+        axes[0].text(cls, v + total_sif * 0.01, f'{int(v)}\n({percentage:.1f}%)',
                     ha='center', va='bottom', fontsize=9, fontweight='bold')
     
     # 绘制 SGF 分布
-    sgf_counts = np.bincount(sgf_classes.astype(int))
-    sgf_classes_sorted = np.arange(len(sgf_counts))
+    sgf_unique, sgf_counts = np.unique(sgf_classes.astype(int), return_counts=True)
     
-    axes[1].bar(sgf_classes_sorted, sgf_counts, color='coral',
+    axes[1].bar(sgf_unique, sgf_counts, color='coral',
                edgecolor='black', alpha=0.7)
     
     # 构造 X 轴标签
     if sgf_labels_map:
         sgf_xticks = [f"{int(c)}\n{sgf_labels_map.get(float(c), '')}" 
-                     for c in sgf_classes_sorted]
+                     for c in sgf_unique]
     else:
-        sgf_xticks = [str(int(c)) for c in sgf_classes_sorted]
+        sgf_xticks = [str(int(c)) for c in sgf_unique]
     
-    axes[1].set_xticks(sgf_classes_sorted)
+    axes[1].set_xticks(sgf_unique)
     axes[1].set_xticklabels(sgf_xticks, fontsize=9)
     axes[1].set_xlabel('SGF Class', fontsize=11, fontweight='bold')
     axes[1].set_ylabel('Count', fontsize=11, fontweight='bold')
@@ -276,9 +272,9 @@ def plot_class_distribution(
     
     # 在柱状图上标注数值和百分比
     total_sgf = sgf_counts.sum()
-    for i, v in enumerate(sgf_counts):
+    for cls, v in zip(sgf_unique, sgf_counts):
         percentage = (v / total_sgf) * 100
-        axes[1].text(i, v + total_sgf * 0.01, f'{int(v)}\n({percentage:.1f}%)',
+        axes[1].text(cls, v + total_sgf * 0.01, f'{int(v)}\n({percentage:.1f}%)',
                     ha='center', va='bottom', fontsize=9, fontweight='bold')
     
     plt.tight_layout()
