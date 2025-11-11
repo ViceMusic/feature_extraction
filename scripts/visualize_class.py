@@ -112,20 +112,18 @@ def get_label_mapping(dataset_name: str) -> Optional[Dict]:
     return None
 
 
-def load_csv_with_labels(csv_path: Path) -> Tuple[Optional[np.ndarray], Optional[np.ndarray], int, int, Dict]:
+def load_csv_with_labels(csv_path: Path) -> Tuple[np.ndarray, np.ndarray, np.ndarray, Dict]:
     """
-    加载 CSV 文件并提取 SIF/SGF 类别标签，排除缺失值。
+    加载 CSV 文件并提取 SIF/SGF 类别标签，允许单标签样本，缺失标签用 -1 表示。
 
     Args:
         csv_path (Path): CSV 文件路径。
 
     Returns:
-        Tuple[Optional[np.ndarray], Optional[np.ndarray], int, int, Dict]:
-            - sif_classes: SIF 类别标签数组
-            - sgf_classes: SGF 类别标签数组
-            - total_rows: 总行数
-            - missing_sif: SIF 列缺失值数量
-            - missing_sgf: SGF 列缺失值数量
+        Tuple[np.ndarray, np.ndarray, np.ndarray, Dict]:
+            - sif_classes: SIF 类别标签数组（缺失值用 -1 表示）
+            - sgf_classes: SGF 类别标签数组（缺失值用 -1 表示）
+            - ids: 样本 ID 数组
             - info_dict: 包含统计信息的字典
 
     Raises:
@@ -148,36 +146,80 @@ def load_csv_with_labels(csv_path: Path) -> Tuple[Optional[np.ndarray], Optional
         
         total_rows = len(df)
         
-        # 计算缺失值
-        sif_missing = df['SIF_class'].isna().sum()
-        sgf_missing = df['SGF_class'].isna().sum()
+        # 获取 id 列（如果存在）
+        if 'id' in df.columns:
+            ids = df['id'].astype(str).values
+        else:
+            ids = np.arange(total_rows, dtype=object)
         
-        # 提取非缺失的类别标签
-        sif_valid = df['SIF_class'].dropna().values
-        sgf_valid = df['SGF_class'].dropna().values
+        # 初始化标签数组
+        sif_classes = []
+        sgf_classes = []
+        valid_ids = []
         
-        # 转换为整数或浮点数
-        try:
-            sif_valid = np.array([int(x) if x == int(x) else x for x in sif_valid], dtype=float)
-            sgf_valid = np.array([int(x) if x == int(x) else x for x in sgf_valid], dtype=float)
-        except (ValueError, TypeError):
-            sif_valid = np.array(sif_valid, dtype=float)
-            sgf_valid = np.array(sgf_valid, dtype=float)
+        # 遍历每一行，允许单标签样本
+        for idx, row in df.iterrows():
+            sif_class = row['SIF_class']
+            sgf_class = row['SGF_class']
+            
+            # 检查两个标签是否都缺失 - 只有都缺失才跳过
+            sif_is_na = bool(pd.isna(sif_class))
+            sgf_is_na = bool(pd.isna(sgf_class))
+            
+            if sif_is_na and sgf_is_na:
+                continue  # 跳过两个标签都缺失的行
+            
+            # 处理 SIF_class - 如果缺失则用 -1 表示
+            sif_int = -1
+            if not sif_is_na:
+                sif_str = str(sif_class).strip()
+                if sif_str == '' or sif_str == '----':
+                    sif_int = -1
+                else:
+                    try:
+                        sif_int = int(float(sif_str))
+                    except (ValueError, TypeError):
+                        sif_int = -1
+            
+            # 处理 SGF_class - 如果缺失则用 -1 表示
+            sgf_int = -1
+            if not sgf_is_na:
+                sgf_str = str(sgf_class).strip()
+                if sgf_str == '' or sgf_str == '----':
+                    sgf_int = -1
+                else:
+                    try:
+                        sgf_int = int(float(sgf_str))
+                    except (ValueError, TypeError):
+                        sgf_int = -1
+            
+            sif_classes.append(sif_int)
+            sgf_classes.append(sgf_int)
+            valid_ids.append(ids[idx])
+        
+        # 转换为 numpy 数组
+        sif_classes = np.array(sif_classes, dtype=np.int32)
+        sgf_classes = np.array(sgf_classes, dtype=np.int32)
+        valid_ids = np.array(valid_ids, dtype=object)
+        
+        # 统计缺失值
+        sif_missing_count = np.sum(sif_classes == -1)
+        sgf_missing_count = np.sum(sgf_classes == -1)
         
         logger.info(
             f"成功加载 CSV 文件: {csv_path.name} "
-            f"(总行数: {total_rows}, SIF 有效: {len(sif_valid)}, SGF 有效: {len(sgf_valid)})"
+            f"(总行数: {total_rows}, 有效行: {len(sif_classes)}, "
+            f"SIF缺失: {sif_missing_count}, SGF缺失: {sgf_missing_count})"
         )
         
         info_dict = {
             'total_rows': total_rows,
-            'sif_missing': int(sif_missing),
-            'sgf_missing': int(sgf_missing),
-            'sif_valid': len(sif_valid),
-            'sgf_valid': len(sgf_valid)
+            'valid_rows': len(sif_classes),
+            'sif_missing': int(sif_missing_count),
+            'sgf_missing': int(sgf_missing_count),
         }
         
-        return sif_valid, sgf_valid, info_dict
+        return sif_classes, sgf_classes, valid_ids, info_dict
     
     except Exception as e:
         logger.error(f"加载 CSV 文件出错: {e}")
@@ -223,8 +265,10 @@ def plot_class_distribution(
         sif_labels_map = label_mapping.get('sif_labels', {})
         sgf_labels_map = label_mapping.get('sgf_labels', {})
     
-    # 绘制 SIF 分布
-    sif_unique, sif_counts = np.unique(sif_classes.astype(int), return_counts=True)
+    # 绘制 SIF 分布 - 过滤掉 -1（缺失值）
+    sif_valid = sif_classes[sif_classes != -1]
+    sif_missing = np.sum(sif_classes == -1)
+    sif_unique, sif_counts = np.unique(sif_valid.astype(int), return_counts=True)
     
     axes[0].bar(sif_unique, sif_counts, color='steelblue',
                edgecolor='black', alpha=0.7)
@@ -240,7 +284,8 @@ def plot_class_distribution(
     axes[0].set_xticklabels(sif_xticks, fontsize=9)
     axes[0].set_xlabel('SIF Class', fontsize=11, fontweight='bold')
     axes[0].set_ylabel('Count', fontsize=11, fontweight='bold')
-    axes[0].set_title('SIF Stability Distribution', fontsize=12)
+    title_sif = f'SIF Stability Distribution (Missing: {sif_missing})'
+    axes[0].set_title(title_sif, fontsize=12)
     axes[0].grid(True, alpha=0.3, axis='y')
     
     # 在柱状图上标注数值和百分比
@@ -250,8 +295,10 @@ def plot_class_distribution(
         axes[0].text(cls, v + total_sif * 0.01, f'{int(v)}\n({percentage:.1f}%)',
                     ha='center', va='bottom', fontsize=9, fontweight='bold')
     
-    # 绘制 SGF 分布
-    sgf_unique, sgf_counts = np.unique(sgf_classes.astype(int), return_counts=True)
+    # 绘制 SGF 分布 - 过滤掉 -1（缺失值）
+    sgf_valid = sgf_classes[sgf_classes != -1]
+    sgf_missing = np.sum(sgf_classes == -1)
+    sgf_unique, sgf_counts = np.unique(sgf_valid.astype(int), return_counts=True)
     
     axes[1].bar(sgf_unique, sgf_counts, color='coral',
                edgecolor='black', alpha=0.7)
@@ -267,7 +314,8 @@ def plot_class_distribution(
     axes[1].set_xticklabels(sgf_xticks, fontsize=9)
     axes[1].set_xlabel('SGF Class', fontsize=11, fontweight='bold')
     axes[1].set_ylabel('Count', fontsize=11, fontweight='bold')
-    axes[1].set_title('SGF Stability Distribution', fontsize=12)
+    title_sgf = f'SGF Stability Distribution (Missing: {sgf_missing})'
+    axes[1].set_title(title_sgf, fontsize=12)
     axes[1].grid(True, alpha=0.3, axis='y')
     
     # 在柱状图上标注数值和百分比
@@ -314,32 +362,49 @@ def plot_joint_distribution(
     
     fig, ax = plt.subplots(figsize=(10, 8))
     
-    # 创建交叉表
+    # 创建交叉表，包含所有值（包括 -1）
     joint_dist = pd.crosstab(
         pd.Series(sif_classes, name='SIF'),
         pd.Series(sgf_classes, name='SGF')
     )
     
-    # 绘制热力图
-    sns.heatmap(joint_dist, annot=True, fmt='d', cmap='YlOrRd', ax=ax,
-               cbar_kws={'label': 'Count'})
-    
-    # 调整坐标轴标签，包含时间范围信息
+    # 调整坐标轴标签，包含时间范围信息和缺失类别
     label_mapping_config = label_mapping or {}
     sif_labels_map = label_mapping_config.get('sif_labels', {})
     sgf_labels_map = label_mapping_config.get('sgf_labels', {})
     
+    # 创建标签字典，将 -1 映射为 "Missing"
+    index_labels = []
+    for idx in joint_dist.index:
+        if idx == -1:
+            index_labels.append("Missing")
+        elif sif_labels_map:
+            index_labels.append(f"{int(idx)}\n{sif_labels_map.get(float(idx), '')}")
+        else:
+            index_labels.append(str(int(idx)))
+    
+    column_labels = []
+    for col in joint_dist.columns:
+        if col == -1:
+            column_labels.append("Missing")
+        elif sgf_labels_map:
+            column_labels.append(f"{int(col)}\n{sgf_labels_map.get(float(col), '')}")
+        else:
+            column_labels.append(str(int(col)))
+    
+    # 重新标记行和列
+    joint_dist.index = index_labels
+    joint_dist.columns = column_labels
+    
+    # 绘制热力图
+    sns.heatmap(joint_dist, annot=True, fmt='d', cmap='YlOrRd', ax=ax,
+               cbar_kws={'label': 'Count'})
+    
     # 设置 Y 轴标签（SIF）
-    if sif_labels_map:
-        sif_yticklabels = [f"{int(idx)}\n{sif_labels_map.get(float(idx), '')}" 
-                          for idx in joint_dist.index]
-        ax.set_yticklabels(sif_yticklabels, rotation=0, fontsize=9)
+    ax.set_yticklabels(index_labels, rotation=0, fontsize=9)
     
     # 设置 X 轴标签（SGF）
-    if sgf_labels_map:
-        sgf_xticklabels = [f"{int(col)}\n{sgf_labels_map.get(float(col), '')}" 
-                          for col in joint_dist.columns]
-        ax.set_xticklabels(sgf_xticklabels, rotation=45, ha='right', fontsize=9)
+    ax.set_xticklabels(column_labels, rotation=45, ha='right', fontsize=9)
     
     ax.set_xlabel('SGF Stability Class', fontsize=12, fontweight='bold')
     ax.set_ylabel('SIF Stability Class', fontsize=12, fontweight='bold')
@@ -363,6 +428,7 @@ def plot_joint_distribution(
 def generate_statistics_summary(
     sif_classes: np.ndarray,
     sgf_classes: np.ndarray,
+    ids: np.ndarray,
     dataset_name: str,
     csv_path: Path,
     label_mapping: Optional[Dict] = None
@@ -370,9 +436,12 @@ def generate_statistics_summary(
     """
     生成数据集的统计摘要信息。
 
+    包含缺失标签的统计信息（-1 值）及其对应的样本 ID。
+
     Args:
-        sif_classes (np.ndarray): SIF 类别标签数组。
-        sgf_classes (np.ndarray): SGF 类别标签数组。
+        sif_classes (np.ndarray): SIF 类别标签数组（包含 -1 表示缺失）。
+        sgf_classes (np.ndarray): SGF 类别标签数组（包含 -1 表示缺失）。
+        ids (np.ndarray): 样本 ID 数组。
         dataset_name (str): 数据集名称。
         csv_path (Path): CSV 文件路径。
         label_mapping (Optional[Dict]): 标签映射配置。
@@ -389,49 +458,70 @@ def generate_statistics_summary(
         sif_labels_map = label_mapping.get('sif_labels', {})
         sgf_labels_map = label_mapping.get('sgf_labels', {})
     
-    # 计算 SIF 分布
-    sif_unique, sif_counts = np.unique(sif_classes, return_counts=True)
-    sif_distribution = {}
-    total_sif = len(sif_classes)
-    for cls, count in zip(sif_unique, sif_counts):
-        sif_distribution[str(int(cls))] = {
-            'count': int(count),
-            'percentage': round(count / total_sif * 100, 2),
-            'label': sif_labels_map.get(float(cls), f'Class {int(cls)}')
-        }
+    # 计算缺失标签统计信息
+    sif_missing_mask = sif_classes == -1
+    sgf_missing_mask = sgf_classes == -1
+    sif_missing_count = np.sum(sif_missing_mask)
+    sgf_missing_count = np.sum(sgf_missing_mask)
     
-    # 计算 SGF 分布
-    sgf_unique, sgf_counts = np.unique(sgf_classes, return_counts=True)
-    sgf_distribution = {}
-    total_sgf = len(sgf_classes)
-    for cls, count in zip(sgf_unique, sgf_counts):
-        sgf_distribution[str(int(cls))] = {
-            'count': int(count),
-            'percentage': round(count / total_sgf * 100, 2),
-            'label': sgf_labels_map.get(float(cls), f'Class {int(cls)}')
-        }
+    # 获取缺失标签的 ID
+    sif_missing_ids = ids[sif_missing_mask].tolist() if sif_missing_count > 0 else []
+    sgf_missing_ids = ids[sgf_missing_mask].tolist() if sgf_missing_count > 0 else []
     
-    # 读取原始 CSV 获取缺失值信息
+    # 计算 SIF 分布（排除 -1）
+    sif_valid = sif_classes[sif_classes != -1]
+    if len(sif_valid) > 0:
+        sif_unique, sif_counts = np.unique(sif_valid, return_counts=True)
+        sif_distribution = {}
+        total_sif = len(sif_valid)
+        for cls, count in zip(sif_unique, sif_counts):
+            sif_distribution[str(int(cls))] = {
+                'count': int(count),
+                'percentage': round(count / total_sif * 100, 2),
+                'label': sif_labels_map.get(float(cls), f'Class {int(cls)}')
+            }
+    else:
+        sif_distribution = {}
+    
+    # 计算 SGF 分布（排除 -1）
+    sgf_valid = sgf_classes[sgf_classes != -1]
+    if len(sgf_valid) > 0:
+        sgf_unique, sgf_counts = np.unique(sgf_valid, return_counts=True)
+        sgf_distribution = {}
+        total_sgf = len(sgf_valid)
+        for cls, count in zip(sgf_unique, sgf_counts):
+            sgf_distribution[str(int(cls))] = {
+                'count': int(count),
+                'percentage': round(count / total_sgf * 100, 2),
+                'label': sgf_labels_map.get(float(cls), f'Class {int(cls)}')
+            }
+    else:
+        sgf_distribution = {}
+    
+    # 读取原始 CSV 获取总行数
     try:
         df = pd.read_csv(csv_path)
-        sif_missing = int(df['SIF_class'].isna().sum())
-        sgf_missing = int(df['SGF_class'].isna().sum())
         total_rows = len(df)
     except Exception as e:
-        logger.warning(f"读取缺失值信息失败: {e}")
-        sif_missing = 0
-        sgf_missing = 0
-        total_rows = 0
+        logger.warning(f"读取 CSV 信息失败: {e}")
+        total_rows = len(sif_classes)
     
     summary = {
         'dataset_name': dataset_name,
         'csv_file': str(csv_path.name),
         'total_rows': total_rows,
-        'valid_rows_sif': total_sif,
-        'valid_rows_sgf': total_sgf,
+        'valid_rows': len(sif_classes),
+        'valid_rows_sif': len(sif_valid),
+        'valid_rows_sgf': len(sgf_valid),
         'missing_values': {
-            'sif': sif_missing,
-            'sgf': sgf_missing
+            'sif': {
+                'count': int(sif_missing_count),
+                'ids': sif_missing_ids
+            },
+            'sgf': {
+                'count': int(sgf_missing_count),
+                'ids': sgf_missing_ids
+            }
         },
         'sif_distribution': sif_distribution,
         'sgf_distribution': sgf_distribution
@@ -467,7 +557,7 @@ def process_single_csv(
     
     try:
         # 加载数据
-        sif_classes, sgf_classes, info_dict = load_csv_with_labels(csv_path)
+        sif_classes, sgf_classes, ids, info_dict = load_csv_with_labels(csv_path)
         
         # 获取标签映射
         label_mapping = get_label_mapping(dataset_name)
@@ -488,7 +578,7 @@ def process_single_csv(
         
         # 生成统计摘要
         summary = generate_statistics_summary(
-            sif_classes, sgf_classes, dataset_name, csv_path, label_mapping
+            sif_classes, sgf_classes, ids, dataset_name, csv_path, label_mapping
         )
         
         logger.info(f"完成 {dataset_name} 的处理")
@@ -496,7 +586,8 @@ def process_single_csv(
         return {
             'dataset': dataset_name,
             'success': True,
-            'summary': summary
+            'summary': summary,
+            'missing_values': summary.get('missing_values', {'sif': {'count': 0, 'ids': []}, 'sgf': {'count': 0, 'ids': []}})
         }
     
     except Exception as e:
