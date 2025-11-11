@@ -1,0 +1,9 @@
+[project]
+name = "feature-extraction"
+version = "0.1.0"
+description = "用来实现对SIF/SGF稳定性的特征提取"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "pandas>=2.0.0",
+]
