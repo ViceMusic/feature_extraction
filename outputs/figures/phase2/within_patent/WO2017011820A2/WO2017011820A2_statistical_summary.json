@@ -1,0 +1,22 @@
+{
+  "SIF_mannwhitney_stat": 546.5,
+  "SIF_mannwhitney_pvalue": 0.6381371294309122,
+  "SIF_monomer_mean": 259.07284768211923,
+  "SIF_dimer_mean": 288.75,
+  "SIF_monomer_std": 156.5943847157468,
+  "SIF_dimer_std": 126.20136970051361,
+  "SGF_mannwhitney_stat": 517.0,
+  "SGF_mannwhitney_pvalue": 0.2817063827628544,
+  "SGF_monomer_mean": 261.50943396226415,
+  "SGF_dimer_mean": 206.25,
+  "SGF_monomer_std": 159.43228120774387,
+  "SGF_dimer_std": 140.1975646823337,
+  "dataset_name": "WO2017011820A2",
+  "total_samples": 159,
+  "monomer_count": 151,
+  "dimer_count": 8,
+  "cyclic_count": 158,
+  "disulfide_count": 72,
+  "SIF_valid_count": 159,
+  "SGF_valid_count": 114
+}

@@ -1,0 +1,18 @@
+{
+  "SIF_monomer_mean": 246.23076923076923,
+  "SIF_dimer_mean": null,
+  "SIF_monomer_std": 157.4076098384783,
+  "SIF_dimer_std": null,
+  "SGF_monomer_mean": 249.0,
+  "SGF_dimer_mean": null,
+  "SGF_monomer_std": 162.9230879411192,
+  "SGF_dimer_std": null,
+  "dataset_name": "US9624268",
+  "total_samples": 130,
+  "monomer_count": 130,
+  "dimer_count": 0,
+  "cyclic_count": 130,
+  "disulfide_count": 54,
+  "SIF_valid_count": 130,
+  "SGF_valid_count": 90
+}
