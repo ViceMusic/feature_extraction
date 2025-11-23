@@ -1,4 +1,5 @@
 # Phase 1: 分子特征提取实施报告
+[可视化结果](../../outputs/figures/phase1/README.md)
 
 **项目**: SIF/SGF 肽类稳定性特征提取
 **阶段**: Phase 1 - 数据转化与分子特征提取
