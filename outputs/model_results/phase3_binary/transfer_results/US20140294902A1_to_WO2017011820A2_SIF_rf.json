@@ -1,23 +1,22 @@
 {
   "train_dataset": "US20140294902A1",
   "test_dataset": "WO2017011820A2",
+  "target": "SIF",
   "model": "rf",
-  "n_train": 5,
-  "n_test": 158,
-  "accuracy": 0.6329113924050633,
-  "precision": 0.6329113924050633,
-  "recall": 1.0,
-  "f1": 0.7751937984496124,
-  "confusion_matrix": [
-    [
-      0,
-      58
-    ],
-    [
-      0,
-      100
+  "metrics": {
+    "accuracy": 0.620253164556962,
+    "precision": 0.620253164556962,
+    "recall": 1.0,
+    "f1": 0.765625,
+    "confusion_matrix": [
+      [
+        0,
+        60
+      ],
+      [
+        0,
+        98
+      ]
     ]
-  ],
-  "auc": 0.7220689655172413,
-  "target": "SIF"
+  }
 }

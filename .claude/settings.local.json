@@ -1,0 +1,40 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(uv run python:*)",
+      "Bash(uv add:*)",
+      "Bash(while ps -p 36573a)",
+      "Bash(/dev/null)",
+      "Bash(do sleep 30)",
+      "Bash(done)",
+      "Bash(cat:*)",
+      "Bash(while pgrep -f \"train_models.py\")",
+      "Bash(do sleep 60)",
+      "Bash(while pgrep -f \"evaluate_transfer.py\")",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(find:*)",
+      "Bash(for file in /home/wuj0c/Projects/SIF_SGF/feature_extraction/data/processed/*.csv)",
+      "Bash(xargs:*)",
+      "Bash(pkill:*)",
+      "Bash(CUDA_VISIBLE_DEVICES=0 uv run python:*)",
+      "Bash(chmod:*)",
+      "Bash(tree:*)",
+      "Bash(uv sync:*)",
+      "Bash(uv run jupyter:*)",
+      "Bash(python -c:*)",
+      "Bash(for i in {1..6})",
+      "Bash(echo:*)",
+      "Bash(if [ -f notebooks/Phase3_executed.ipynb ])",
+      "Bash(then echo \"✓ 文件已生成!\")",
+      "Bash(break)",
+      "Bash(fi)",
+      "Bash(python3:*)",
+      "Bash(tee:*)",
+      "Bash(for notebook in notebooks/Phase{1,2,3}_executed.ipynb)",
+      "Bash(do echo \"=== $notebook ===\")"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

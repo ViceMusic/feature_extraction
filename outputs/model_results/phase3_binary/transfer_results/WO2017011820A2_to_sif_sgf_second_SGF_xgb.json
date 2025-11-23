@@ -1,23 +1,22 @@
 {
   "train_dataset": "WO2017011820A2",
   "test_dataset": "sif_sgf_second",
+  "target": "SGF",
   "model": "xgb",
-  "n_train": 114,
-  "n_test": 558,
-  "accuracy": 0.5913978494623656,
-  "precision": 0.5669456066945606,
-  "recall": 0.928082191780822,
-  "f1": 0.7038961038961039,
-  "confusion_matrix": [
-    [
-      59,
-      207
-    ],
-    [
-      21,
-      271
+  "metrics": {
+    "accuracy": 0.5967741935483871,
+    "precision": 0.58,
+    "recall": 0.8027681660899654,
+    "f1": 0.6734397677793904,
+    "confusion_matrix": [
+      [
+        101,
+        168
+      ],
+      [
+        57,
+        232
+      ]
     ]
-  ],
-  "auc": 0.6319973735709136,
-  "target": "SGF"
+  }
 }

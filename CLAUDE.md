@@ -40,37 +40,176 @@ uv add package-name
 ```
 feature_extraction/
 ├── data/
-│   ├── raw/              # Original CSV files
-│   └── cleaned/          # Cleaned CSV files (preprocessed)
+│   ├── raw/              # Original CSV files (5 datasets, 1,931 samples)
+│   ├── cleaned/          # Cleaned CSV files (preprocessed)
+│   └── processed/        # Processed with molecular features (932 samples)
 ├── outputs/
 │   ├── features/         # NPZ files with extracted features
 │   ├── figures/          # EDA visualization plots
+│   │   ├── phase1/       # Phase 1 feature quality validation
+│   │   ├── phase2/       # Phase 2 within/between patent visualizations
+│   │   └── phase3/       # Phase 3 model performance visualizations
 │   ├── class_distribution/  # Class distribution summaries
 │   └── model_results/    # Machine learning results
 │       ├── cv_results/   # Cross-validation metrics (JSON)
 │       ├── transfer_results/  # Transfer learning metrics (JSON)
+│       ├── phase3_binary/    # Binary classification results
 │       └── figures/      # Model performance visualizations
 ├── src/feature_extraction/
 │   ├── featurizer.py     # PeptideFeaturizer class
 │   ├── visualization.py  # DataVisualizer class
-│   └── utils.py          # Helper functions
-└── scripts/              # Executable scripts
-    ├── clean_csv_data.py
-    ├── extract_sif_sgf_features.py
-    ├── extract_features.py  # Batch feature extraction
-    ├── visualize_data.py
-    ├── visualize_class.py
-    ├── compare_feature_distributions.py
-    ├── train_models.py     # Train ML models with CV
-    ├── evaluate_transfer.py  # Transfer learning evaluation
-    └── visualize_model_results.py  # Model result visualization
+│   └── utils.py          # Helper functions (label conversion, molecular features)
+├── notebooks/            # 🆕 Jupyter Notebooks for interactive analysis
+│   ├── Phase1_数据转化.ipynb          # Interactive Phase 1 workflow
+│   ├── Phase2_数据可视化.ipynb        # Interactive Phase 2 workflow
+│   ├── Phase3_模型验证.ipynb          # Interactive Phase 3 workflow
+│   └── README.md                      # Notebooks usage guide
+├── scripts/              # Executable scripts for automation
+│   ├── clean_csv_data.py              # Data cleaning
+│   ├── add_molecular_features.py      # Add dimer/cyclic/disulfide features
+│   ├── extract_sif_sgf_features.py    # Single file feature extraction
+│   ├── extract_features.py            # Batch feature extraction
+│   ├── visualize_data.py              # Basic EDA visualizations
+│   ├── visualize_class.py             # Class distribution analysis
+│   ├── compare_feature_distributions.py  # Compare features across datasets
+│   ├── phase1_visualize.py            # Phase 1 feature quality validation
+│   ├── visualize_within_patent.py     # Phase 2 within-patent analysis
+│   ├── visualize_between_patents.py   # Phase 2 between-patent comparison
+│   ├── generate_phase2_report.py      # Auto-generate Phase 2 report
+│   ├── binary_classification.py       # Phase 3 binary classification modeling
+│   ├── train_models.py                # Multi-class model training with CV
+│   ├── evaluate_transfer.py           # Transfer learning evaluation
+│   ├── visualize_model_results.py     # Model result visualization
+│   ├── visualize_phase3_results.py    # Phase 3 comprehensive visualization
+│   └── generate_phase3_report.py      # Auto-generate Phase 3 report
+└── docs/
+    ├── dev/                           # Development documentation
+    │   ├── 项目进度.md                # Project progress tracker
+    │   ├── 特征提取.md                # Feature extraction plan
+    │   ├── Phase1_分子特征提取报告.md  # Phase 1 report
+    │   ├── Phase2_数据可视化报告.md    # Phase 2 report
+    │   └── Phase3_模型验证报告.md      # Phase 3 report
+    ├── Visualization/                 # Visualization guides
+    └── SIF_SGF_summary.md             # Project summary
 ```
+
+## 🎯 Quick Start: Choose Your Workflow
+
+This project offers **two complementary ways** to work with the data:
+
+### 📓 **Jupyter Notebooks** (Recommended for Learning & Exploration)
+**Use notebooks when you want to:**
+- Interactively explore data and visualizations
+- Learn the workflow step-by-step
+- Experiment with parameters and see immediate results
+- Generate presentation-ready outputs
+- Debug and understand intermediate steps
+
+**Quick Start:**
+```bash
+# Navigate to project root
+cd /path/to/feature_extraction
+
+# Start Jupyter Notebook
+uv run jupyter notebook notebooks/
+
+# Or use JupyterLab
+uv run jupyter lab notebooks/
+```
+
+**Three notebooks available:**
+1. `Phase1_数据转化.ipynb` - Data transformation and feature extraction
+2. `Phase2_数据可视化.ipynb` - Exploratory data analysis and visualization
+3. `Phase3_模型验证.ipynb` - Machine learning modeling and validation
+
+**See `notebooks/README.md` for detailed usage guide.**
+
+---
+
+### 🖥️ **Command-Line Scripts** (Recommended for Automation)
+**Use scripts when you want to:**
+- Batch process multiple datasets automatically
+- Run jobs in the background or on remote servers
+- Integrate into automated pipelines
+- Generate detailed log files
+- Schedule with cron jobs
+
+**Quick Start:**
+```bash
+# All scripts use 'uv run python' prefix
+uv run python scripts/add_molecular_features.py --input_dir data/raw/ --output_dir data/processed/
+```
+
+---
 
 ## Common Workflows
 
-### Complete End-to-End Pipeline
+### Complete Three-Phase Pipeline
 
-**Typical workflow from raw data to model evaluation:**
+This project follows a three-phase research pipeline as documented in `docs/dev/项目进度.md`:
+
+**Phase 1: Data Transformation (数据转化)**
+```bash
+# Step 1: Add molecular features (dimer, cyclic, disulfide detection)
+uv run python scripts/add_molecular_features.py \
+    --input_dir data/raw/ \
+    --output_dir data/processed/
+
+# Step 2: Extract RDKit-based molecular features
+uv run python scripts/extract_features.py \
+    --input_dir data/processed/ \
+    --output_dir outputs/features/
+
+# Step 3: Validate feature quality
+uv run python scripts/phase1_visualize.py \
+    --input_dir outputs/features/ \
+    --output_dir outputs/figures/phase1/
+```
+
+**Phase 2: Data Visualization (数据可视化)**
+```bash
+# Within-patent analysis (monomer vs dimer, structural features)
+uv run python scripts/visualize_within_patent.py \
+    --processed_dir data/processed/ \
+    --features_dir outputs/features/ \
+    --output_dir outputs/figures/phase2/within_patent/
+
+# Between-patent comparison (PCA, t-SNE, label distributions)
+uv run python scripts/visualize_between_patents.py \
+    --processed_dir data/processed/ \
+    --features_dir outputs/features/ \
+    --output_dir outputs/figures/phase2/between_patents/
+
+# Generate comprehensive Phase 2 report
+uv run python scripts/generate_phase2_report.py \
+    --figures_dir outputs/figures/phase2/ \
+    --output_dir docs/dev/
+```
+
+**Phase 3: Model Validation (模型验证)**
+```bash
+# Binary classification with cross-validation and transfer learning
+uv run python scripts/binary_classification.py \
+    --processed_dir data/processed/ \
+    --features_dir outputs/features/ \
+    --output_dir outputs/model_results/phase3_binary/ \
+    --n_folds 5 \
+    --use_gpu
+
+# Visualize Phase 3 results (confusion matrices, feature importance, heatmaps)
+uv run python scripts/visualize_phase3_results.py \
+    --results_dir outputs/model_results/phase3_binary/ \
+    --output_dir outputs/figures/phase3/
+
+# Generate comprehensive Phase 3 report
+uv run python scripts/generate_phase3_report.py \
+    --results_dir outputs/model_results/phase3_binary/ \
+    --output_dir docs/dev/
+```
+
+### Legacy Multi-Class Pipeline
+
+**For original multi-class classification workflow:**
 
 ```bash
 # Step 1: Clean raw CSV data
@@ -190,6 +329,56 @@ Generates performance comparison charts, transfer learning heatmaps, feature imp
 
 ## Core Components
 
+### Utils Module (`src/feature_extraction/utils.py`)
+
+**Purpose:** Provides label conversion and molecular feature detection utilities.
+
+**Key functions:**
+
+**1. Label Conversion:**
+- `convert_label_to_minutes(label)`: Converts diverse label formats to minutes
+  - Star system (`*****` to `*`) → 360, 180, 60, 30, 10 minutes
+  - Numeric classes (1-4) → 540, 180, 60, 30 minutes
+  - Direct minute values → unchanged
+  - Missing/invalid → -1
+
+**2. Molecular Feature Detection:**
+- `detect_dimer(smiles)`: Detects dimeric peptides
+  - Checks for PEG linkers, high molecular weight, long SMILES
+  - Returns: `True` if dimer, `False` if monomer
+- `detect_cyclic(smiles)`: Detects cyclic structures
+  - Checks for ring structures using RDKit
+  - Returns: `True` if cyclic, `False` otherwise
+- `detect_disulfide(smiles)`: Detects disulfide bonds
+  - Searches for "CSSC" pattern in SMILES
+  - Returns: `True` if contains disulfide, `False` otherwise
+- `extract_molecular_features(smiles)`: Combined feature extraction
+  - Returns: `{"is_dimer": bool, "is_cyclic": bool, "has_disulfide": bool}`
+
+**3. Data Utilities:**
+- `validate_csv_columns(df, required_cols)`: Validates CSV column structure
+- `get_csv_files(directory)`: Gets all CSV files from a directory
+- `load_csv_safely(csv_path)`: Safely loads CSV with error handling
+- `build_output_path(input_path, output_dir, suffix)`: Constructs output paths
+- `save_features_to_npz(...)`: Saves features to NPZ format
+- `format_batch_summary(stats)`: Formats batch processing summary
+
+**Usage:**
+```python
+from src.feature_extraction.utils import (
+    convert_label_to_minutes,
+    extract_molecular_features
+)
+
+# Convert labels
+minutes = convert_label_to_minutes("***")  # Returns 60
+minutes = convert_label_to_minutes(2)      # Returns 180
+
+# Extract molecular features
+features = extract_molecular_features("CC(C)C[C@H](NC(=O)...")
+print(features)  # {"is_dimer": False, "is_cyclic": True, "has_disulfide": False}
+```
+
 ### PeptideFeaturizer (`src/feature_extraction/featurizer.py`)
 
 **Purpose:** Extract molecular features from SMILES strings.
@@ -258,17 +447,35 @@ summary = visualizer.generate_summary_statistics()
 ## Data Format
 
 ### Input CSV Format
+
+**Raw CSV (data/raw/):**
 ```csv
 id,SMILES,SIF_class,SGF_class
-peptide_001,CC(C)C[C@H](NC...)...,0,1
-peptide_002,C[C@H](NC(=O)...)...,-1,2
+peptide_001,CC(C)C[C@H](NC...)...,***,**
+peptide_002,C[C@H](NC(=O)...)...,2,3
+```
+
+**Processed CSV (data/processed/):**
+```csv
+id,SMILES,SIF_class,SGF_class,SIF_minutes,SGF_minutes,is_dimer,is_cyclic,has_disulfide
+peptide_001,CC(C)C[C@H](NC...)...,***,**,60,30,0,1,0
+peptide_002,C[C@H](NC(=O)...)...,2,3,180,60,1,1,1
 ```
 
 **Column requirements:**
+
+**Raw CSV:**
 - `id`: Unique identifier (string/int)
 - `SMILES`: Valid SMILES string
-- `SIF_class`: Integer class label or -1 (missing)
-- `SGF_class`: Integer class label or -1 (missing)
+- `SIF_class`: Star/numeric/minute label (or empty for missing)
+- `SGF_class`: Star/numeric/minute label (or empty for missing)
+
+**Processed CSV (additional columns):**
+- `SIF_minutes`: Half-life in minutes (or -1 for missing)
+- `SGF_minutes`: Half-life in minutes (or -1 for missing)
+- `is_dimer`: 1 if dimer, 0 if monomer
+- `is_cyclic`: 1 if cyclic, 0 if linear
+- `has_disulfide`: 1 if contains disulfide bond, 0 otherwise
 
 ### Output NPZ Format
 
@@ -358,6 +565,65 @@ The `evaluate_transfer.py` script handles:
 - Dataset 2 has classes: [0, 1, 2, 3]
 - Mapping: {0: 0, 1: 1, 2: 2, 3: 3, 4: 3} (collapse 4 into 3)
 
+## Phase-Specific Implementation Details
+
+### Phase 1: Molecular Feature Detection
+
+**Dimer Detection Logic:**
+The `detect_dimer()` function uses multiple heuristics:
+1. **PEG Linker Detection**: Searches for common PEG patterns (e.g., "OCCOCCOCCO")
+2. **Molecular Weight**: Threshold > 2000 Da suggests dimer
+3. **SMILES Length**: Very long SMILES (> 300 chars) suggests dimer
+4. **Multi-criteria Scoring**: Combines all signals for robust detection
+
+**Cyclic Structure Detection:**
+Uses RDKit's ring detection:
+```python
+mol = Chem.MolFromSmiles(smiles)
+num_rings = mol.GetRingInfo().NumRings()
+is_cyclic = (num_rings > 0)
+```
+
+**Disulfide Bond Detection:**
+Simple pattern matching for "CSSC" motif in SMILES string.
+
+### Phase 2: Visualization Strategies
+
+**Within-Patent Analysis:**
+- Compares monomer vs dimer stability within each dataset
+- Uses Mann-Whitney U test for statistical significance
+- Generates 3 plots per dataset: SIF distribution, SGF distribution, structural features
+
+**Between-Patent Analysis:**
+- Dimensionality reduction: PCA and t-SNE for 2D visualization
+- Point size encodes SIF half-life, color encodes dataset origin
+- Violin plots and boxplots compare label distributions across datasets
+- Kruskal-Wallis test assesses cross-dataset differences
+
+### Phase 3: Binary Classification
+
+**Label Binarization:**
+- Computes median SIF/SGF half-life for each dataset independently
+- Samples ≥ median → "stable" (1), < median → "unstable" (0)
+- Ensures balanced classes within each dataset
+
+**Model Configuration:**
+- **Logistic Regression**: `max_iter=1000, class_weight='balanced'`
+- **Random Forest**: `n_estimators=100, class_weight='balanced', n_jobs=-1`
+- **XGBoost**: `device='cuda:0', tree_method='hist', max_depth=6, learning_rate=0.1`
+
+**GPU Acceleration:**
+XGBoost uses GPU if available. Note: `gpu_id` parameter deprecated in XGBoost 3.1+, use `device='cuda:0'` instead.
+
+**Cross-Validation:**
+- Stratified K-fold (default 5 folds)
+- Automatically adjusts `n_folds` if sample size < 10 (e.g., US20140294902A1 has only 5 samples)
+
+**Transfer Learning:**
+- Trains on Dataset A, tests on Dataset B (bidirectional)
+- Matches class distributions between datasets
+- Saves confusion matrices and transfer metrics
+
 ## Key Implementation Details
 
 ### Missing Label Handling
@@ -432,6 +698,11 @@ This project supports peptide stability modeling in simulated gastrointestinal f
 - `train_models.log`: Model training and cross-validation
 - `evaluate_transfer.log`: Transfer learning evaluation
 - `visualize_model_results.log`: Model result visualization
+- `add_molecular_features.log`: Phase 1 molecular feature detection
+- `visualize_within_patent.log`: Phase 2 within-patent analysis
+- `visualize_between_patents.log`: Phase 2 between-patent comparison
+- `binary_classification.log`: Phase 3 binary classification
+- `visualize_phase3_results.log`: Phase 3 result visualization
 
 **Common issues:**
 - Avalon not available: Check RDKit build, set `use_avalon=False`
@@ -439,3 +710,29 @@ This project supports peptide stability modeling in simulated gastrointestinal f
 - Missing features: Verify feature names match between extraction and visualization
 - Class imbalance warnings: Models use `class_weight='balanced'` by default
 - Transfer learning failures: Check class mapping compatibility between datasets
+- XGBoost GPU errors: Ensure CUDA is available, use `device='cuda:0'` not `gpu_id`
+- ID mismatch errors: NPZ IDs are strings, CSV IDs may be int64 - convert to string for matching
+- Insufficient samples for CV: Script auto-adjusts `n_folds` to `min(n_samples, n_folds)`
+
+## Project Progress and Documentation
+
+**Current Status:** Phase 1-3 completed (as of 2025-11-14)
+
+**Key Metrics:**
+- Original samples: 1,931 across 5 datasets
+- Valid samples after processing: 932 (48.3%)
+- Largest dataset: sif_sgf_second (558 samples)
+- Smallest dataset: US20140294902A1 (5 samples)
+
+**Phase Reports:**
+- `docs/dev/Phase1_分子特征提取报告.md`: Feature extraction and label conversion
+- `docs/dev/Phase2_数据可视化报告.md`: Within/between patent visualization analysis
+- `docs/dev/Phase3_模型验证报告.md`: Binary classification and transfer learning results
+- `docs/dev/项目进度.md`: Comprehensive project progress tracker
+
+**Key Findings:**
+1. **Dimer Stability**: Dimers show significantly higher stability (p < 0.05, Mann-Whitney U)
+2. **Dataset Heterogeneity**: Significant differences in label distributions across datasets (p < 0.001, Kruskal-Wallis)
+3. **Model Performance**: F1 scores range from 0.65-0.89 for within-dataset CV
+4. **Transfer Learning**: Cross-dataset performance drops notably due to distribution shift
+5. **Feature Importance**: LogP and molecular weight are most predictive features

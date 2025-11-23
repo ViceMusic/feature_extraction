@@ -1,23 +1,22 @@
 {
   "train_dataset": "sif_sgf_second",
   "test_dataset": "US20140294902A1",
+  "target": "SIF",
   "model": "rf",
-  "n_train": 558,
-  "n_test": 5,
-  "accuracy": 0.8,
-  "precision": 1.0,
-  "recall": 0.6666666666666666,
-  "f1": 0.8,
-  "confusion_matrix": [
-    [
-      2,
-      0
-    ],
-    [
-      1,
-      2
+  "metrics": {
+    "accuracy": 0.4,
+    "precision": 0.0,
+    "recall": 0.0,
+    "f1": 0.0,
+    "confusion_matrix": [
+      [
+        2,
+        0
+      ],
+      [
+        3,
+        0
+      ]
     ]
-  ],
-  "auc": 1.0,
-  "target": "SIF"
+  }
 }

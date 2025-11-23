@@ -1,23 +1,22 @@
 {
   "train_dataset": "US9624268",
   "test_dataset": "sif_sgf_second",
+  "target": "SIF",
   "model": "xgb",
-  "n_train": 130,
-  "n_test": 558,
-  "accuracy": 0.35125448028673834,
-  "precision": 0.4827586206896552,
-  "recall": 0.116991643454039,
-  "f1": 0.18834080717488788,
-  "confusion_matrix": [
-    [
-      154,
-      45
-    ],
-    [
-      317,
-      42
+  "metrics": {
+    "accuracy": 0.3727598566308244,
+    "precision": 0.5180722891566265,
+    "recall": 0.24157303370786518,
+    "f1": 0.32950191570881227,
+    "confusion_matrix": [
+      [
+        122,
+        80
+      ],
+      [
+        270,
+        86
+      ]
     ]
-  ],
-  "auc": 0.4676446298344088,
-  "target": "SIF"
+  }
 }

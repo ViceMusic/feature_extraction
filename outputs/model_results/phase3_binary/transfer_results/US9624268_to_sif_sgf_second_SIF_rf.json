@@ -1,23 +1,22 @@
 {
   "train_dataset": "US9624268",
   "test_dataset": "sif_sgf_second",
+  "target": "SIF",
   "model": "rf",
-  "n_train": 130,
-  "n_test": 558,
-  "accuracy": 0.3548387096774194,
-  "precision": 0.0,
-  "recall": 0.0,
-  "f1": 0.0,
-  "confusion_matrix": [
-    [
-      198,
-      1
-    ],
-    [
-      359,
-      0
+  "metrics": {
+    "accuracy": 0.3602150537634409,
+    "precision": 0.0,
+    "recall": 0.0,
+    "f1": 0.0,
+    "confusion_matrix": [
+      [
+        201,
+        1
+      ],
+      [
+        356,
+        0
+      ]
     ]
-  ],
-  "auc": 0.5223401128203693,
-  "target": "SIF"
+  }
 }
