@@ -4,18 +4,18 @@
   "target": "SGF",
   "model": "xgb",
   "metrics": {
-    "accuracy": 0.5967741935483871,
-    "precision": 0.58,
-    "recall": 0.8027681660899654,
-    "f1": 0.6734397677793904,
+    "accuracy": 0.10396039603960396,
+    "precision": 0.0,
+    "recall": 0.0,
+    "f1": 0.0,
     "confusion_matrix": [
       [
-        101,
-        168
+        21,
+        181
       ],
       [
-        57,
-        232
+        0,
+        0
       ]
     ]
   }

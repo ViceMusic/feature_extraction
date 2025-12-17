@@ -4,18 +4,13 @@
   "target": "SIF",
   "model": "rf",
   "metrics": {
-    "accuracy": 0.6433691756272402,
-    "precision": 0.6618556701030928,
-    "recall": 0.901685393258427,
-    "f1": 0.7633769322235434,
+    "accuracy": 1.0,
+    "precision": 0.0,
+    "recall": 0.0,
+    "f1": 0.0,
     "confusion_matrix": [
       [
-        38,
-        164
-      ],
-      [
-        35,
-        321
+        202
       ]
     ]
   }
