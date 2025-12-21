@@ -48,6 +48,7 @@ uv run python --version # 该命令用于初始化虚拟环境并且下载所有
 
 # 20251217总结日志
 
+
 1. 参考之前github的代码，把phase1中 Morgan_fingerprint 去除后再跑后续的phase2/3
 2. phase3训练模型前注意增加几项处理，只考虑monomer，去除monomer数据，并且把US9809623B2数据集中的异常值去除
 3. 训练模型，给出定量的性能比较，去除Morgan_fingerprint前后有什么性能差别
@@ -151,3 +152,31 @@ US9809623B2数据集在SGF任务中也有一定的迁移潜力，但是该数据
 ### 3.3 实验留档
 
     D:\RA\feature_extraction\recordings\20251216数据分析整理.pdf
+
+
+# 20251219日报
+
+当日任务：
+把去掉Morgan指纹后的特征和数据整理成一个.npy或者.pkl文件，然后写一个jupyter notebook展示如何读入这些预处理好的数据，方便进行特征分析和模型训练。然后把.npy和jupyter notebook发给我，我这边进行特征分析。（下周一前给我）
+
+* 整理一个npy文件/pkl文件，和上次一样
+
+
+输出的内容是这样的, 经过特征筛选以后，内容如下：
+
+```
+np.savez_compressed(
+    output_path,                 # 输出路径
+    X=X,                         # 特征，标签，还有id
+    y_sif=y_sif,
+    y_sgf=y_sgf,
+    ids=ids,
+    feature_names=feature_names, # 特征名字的list
+)
+```
+
+
+格式全称核心特点适用场景（NPZ，NPY，PKL）
+npyNumPy Array单数组存储。二进制格式，读写速度最快，占用空间小。存储单个大型矩阵（如特征矩阵 X）。
+npzNumPy Zipped多数组存储。本质是一个包含多个 .npy 的压缩包。同时保存 X, y, names 等多个关联变量。
+pklPickle File万能序列化。可以保存几乎任何 Python 对象（字典、模型、类）。存储复杂的嵌套字典或训练好的机器学习模型。
