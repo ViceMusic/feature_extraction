@@ -154,29 +154,87 @@ US9809623B2数据集在SGF任务中也有一定的迁移潜力，但是该数据
     D:\RA\feature_extraction\recordings\20251216数据分析整理.pdf
 
 
-# 20251219日报
+# 20251221日报
 
-当日任务：
-把去掉Morgan指纹后的特征和数据整理成一个.npy或者.pkl文件，然后写一个jupyter notebook展示如何读入这些预处理好的数据，方便进行特征分析和模型训练。然后把.npy和jupyter notebook发给我，我这边进行特征分析。（下周一前给我）
+备注：
+    前两天考托业去了，有点忙
 
-* 整理一个npy文件/pkl文件，和上次一样
+**1.更新内容**
+* 新建了get_npy_or_pkl.ipynb文件，主要内容为生成processed文件和npy文件（在这一阶段就对单体分子进行筛选）
+* 新建了read_npy.ipynb文件，主要内容为读取npy文件，并且根据数据集-任务筛选，根据阈值二值化y，剔除异常值，最终返回nbarry格式数据（X，二值化y，原始y，特征名称）
+
+**2.修改问题**
+* 1.在上述更新内容中，修改了路径读取问题，由于不确定"运行环境"到底指的是什么，这里将其修改为如下格式， 直接获取”当前脚本所在位置“作为根目录，后续的新增脚本将全部跟随该思路。
+    ```
+    import numpy as np
+    from pathlib import Path
+
+    # 获取相对目录的两种方式，前者针对正常环境，后者针对notebook
+    script_dir = Path(__file__).parent  # 脚本目录,但是这个在notebook里面不能用
+    script_dir = Path().resolve()  # 当前文件所在目录
+
+    # 类似这种用法，对于Path类路径，可以直接使用 / 进行拼接
+    data_path = script_dir / "../outputs/npy_datas/sif_sgf_second_processed/X.npy"
+
+    # 进行后续操作
+    X = np.load(data_path)
+    ```
+
+* 2.关于分子指纹
+
+    分子指纹的表现形式为布尔值集合，例如Morgan的分子指纹（1024bit），在提取后的特征中表现为
+
+    ```
+    [0,1,0,2,1,..........]# 1024个值，每个数值代表一个特征是否存在
+    ```
+
+    Avlvon也是类似的处理方式
+
+**3.关于numpy可用的mask操作**
+
+* 对于numpy数据来说，可以使用dtype为bool的数组，对ndarray格式的数据进行筛选（前提是mask数组和原始数组长度一致）
+* 对于mask数组，可以使用初始化为1，长度为n的初始值，使用按位与操作，为每个需要被筛掉的位置变更为False
+* X[mask]机制完成操作，如下方代码所示
+
+    ```
+        # ------------------------------------------------------------------
+        # 4和5用了三个很有意思的特性， csv转npy时候的自动转化操作，numpy的筛选操作，多重叠加的按位与操作
+        # ------------------------------------------------------------------
+
+        # 4. 构造样本筛选 mask
+        valid_mask = np.ones(n, dtype=bool)  # 生成的原址数值全都为1
+
+        # 4.1 根据 is_monomer 过滤（如果指定），该方法已经被完全废弃，因为筛选已经移动到csv中
+        #if is_monomer is not None:
+        #    valid_mask &= (X[:, monomer_col_idx] == int(is_monomer)) # 如果是单体，则筛选出单体样本，否则筛选出非单体样本
+
+        # 4.2 过滤无效标签(mask是按位与操作)
+        valid_mask &= (y_raw != -1)   # 添加筛选条件，若为-1则过滤
+        valid_mask &= ~np.isnan(y_raw) # 添加筛选条件，如果是nan则过滤掉（~为numpy中的取反操作）
+        valid_mask &= (y_raw <= abnormal_point)  # 添加筛选条件，若大于异常值则过滤掉
+
+        # 5. 应用筛选（按位置删除）
+        X_valid = X[valid_mask]
+        y_valid = y_raw[valid_mask]
+
+        print(f"筛选后样本数: {X_valid.shape[0]} / {X.shape[0]}")
+    ```
+
+**4.异常情况**
+
+无
+
+**5.任务背景信息**
+
+1. 当日任务：
+    把去掉Morgan指纹后的特征和数据整理成一个.npy或者.pkl文件，
+    然后写一个jupyter notebook展示如何读入这些预处理好的数据，方便进行特征分析和模型训练。
+    然后把.npy和jupyter notebook发给我，我这边进行特征分析。（下周一前给我）
+
+2. 几种不同的文件类型
+    npyNumPy Array单数组存储。二进制格式，读写速度最快，占用空间小。存储单个大型矩阵（如特征矩阵 X）。
+    npzNumPy Zipped多数组存储。本质是一个包含多个 .npy 的压缩包。同时保存 X, y, names 等多个关联变量。
+    pklPickle File万能序列化。可以保存几乎任何 Python 对象（字典、模型、类）。存储复杂的嵌套字典或训练好的机器学习模型。
 
 
-输出的内容是这样的, 经过特征筛选以后，内容如下：
-
-```
-np.savez_compressed(
-    output_path,                 # 输出路径
-    X=X,                         # 特征，标签，还有id
-    y_sif=y_sif,
-    y_sgf=y_sgf,
-    ids=ids,
-    feature_names=feature_names, # 特征名字的list
-)
-```
-
-
-格式全称核心特点适用场景（NPZ，NPY，PKL）
-npyNumPy Array单数组存储。二进制格式，读写速度最快，占用空间小。存储单个大型矩阵（如特征矩阵 X）。
-npzNumPy Zipped多数组存储。本质是一个包含多个 .npy 的压缩包。同时保存 X, y, names 等多个关联变量。
-pklPickle File万能序列化。可以保存几乎任何 Python 对象（字典、模型、类）。存储复杂的嵌套字典或训练好的机器学习模型。
+# 总结日志（next）
