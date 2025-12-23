@@ -4,14 +4,14 @@
   "target": "SGF",
   "model": "lr",
   "metrics": {
-    "accuracy": 0.33663366336633666,
+    "accuracy": 0.41089108910891087,
     "precision": 0.0,
     "recall": 0.0,
     "f1": 0.0,
     "confusion_matrix": [
       [
-        68,
-        134
+        83,
+        119
       ],
       [
         0,
