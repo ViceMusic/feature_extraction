@@ -1,0 +1,13 @@
+{
+  "train_dataset": "US20140294902A1",
+  "test_dataset": "sif_sgf_second",
+  "target": "SIF",
+  "model": "rf",
+  "metrics": {
+    "accuracy": 0.00613861386138614,
+    "precision": 0.0,
+    "recall": 0.0,
+    "f1": 0.0,
+    "confusion_matrix": 50.5
+  }
+}

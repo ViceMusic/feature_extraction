@@ -1,0 +1,7 @@
+{
+  "train_dataset": "US9809623B2",
+  "test_dataset": "WO2017011820A2",
+  "target": "SGF",
+  "model": "xgb",
+  "metrics": null
+}

@@ -1,0 +1,13 @@
+{
+  "train_dataset": "WO2017011820A2",
+  "test_dataset": "US9624268",
+  "target": "SGF",
+  "model": "rf",
+  "metrics": {
+    "accuracy": 0.7134444444444444,
+    "precision": 0.7887711880751812,
+    "recall": 0.6892307692307695,
+    "f1": 0.7351972158871211,
+    "confusion_matrix": 22.5
+  }
+}

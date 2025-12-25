@@ -1,0 +1,7 @@
+{
+  "train_dataset": "sif_sgf_second",
+  "test_dataset": "US9809623B2",
+  "target": "SGF",
+  "model": "lr",
+  "metrics": null
+}

@@ -4,14 +4,14 @@
   "target": "SIF",
   "model": "xgb",
   "metrics": {
-    "accuracy": 0.39603960396039606,
+    "accuracy": 0.0594059405940594,
     "precision": 0.0,
     "recall": 0.0,
     "f1": 0.0,
     "confusion_matrix": [
       [
-        80,
-        122
+        12,
+        190
       ],
       [
         0,

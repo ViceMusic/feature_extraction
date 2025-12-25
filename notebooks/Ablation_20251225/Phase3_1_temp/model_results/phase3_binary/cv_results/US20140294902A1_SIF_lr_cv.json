@@ -1,0 +1,42 @@
+{
+  "dataset": "US20140294902A1",
+  "target": "SIF",
+  "model": "lr",
+  "n_folds": 2,
+  "metrics": {
+    "accuracy": [
+      1.0,
+      1.0
+    ],
+    "precision": [
+      1.0,
+      1.0
+    ],
+    "recall": [
+      1.0,
+      1.0
+    ],
+    "f1": [
+      1.0,
+      1.0
+    ],
+    "auc": [
+      1.0,
+      1.0
+    ]
+  },
+  "mean_metrics": {
+    "accuracy": 1.0,
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1": 1.0,
+    "auc": 1.0
+  },
+  "std_metrics": {
+    "accuracy": 0.0,
+    "precision": 0.0,
+    "recall": 0.0,
+    "f1": 0.0,
+    "auc": 0.0
+  }
+}
