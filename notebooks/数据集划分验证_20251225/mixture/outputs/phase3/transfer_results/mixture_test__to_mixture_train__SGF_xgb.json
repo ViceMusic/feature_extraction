@@ -1,0 +1,22 @@
+{
+  "train_dataset": "mixture_test_",
+  "test_dataset": "mixture_train_",
+  "target": "SGF",
+  "model": "xgb",
+  "metrics": {
+    "accuracy": 0.7966666666666666,
+    "precision": 0.7564102564102564,
+    "recall": 0.5841584158415841,
+    "f1": 0.659217877094972,
+    "confusion_matrix": [
+      [
+        180,
+        19
+      ],
+      [
+        42,
+        59
+      ]
+    ]
+  }
+}

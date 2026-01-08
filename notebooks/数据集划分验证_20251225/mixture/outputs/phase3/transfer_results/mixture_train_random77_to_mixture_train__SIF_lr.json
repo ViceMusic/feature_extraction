@@ -1,0 +1,22 @@
+{
+  "train_dataset": "mixture_train_random77",
+  "test_dataset": "mixture_train_",
+  "target": "SIF",
+  "model": "lr",
+  "metrics": {
+    "accuracy": 0.8430379746835444,
+    "precision": 0.7398843930635838,
+    "recall": 0.8827586206896552,
+    "f1": 0.8050314465408805,
+    "confusion_matrix": [
+      [
+        205,
+        45
+      ],
+      [
+        17,
+        128
+      ]
+    ]
+  }
+}

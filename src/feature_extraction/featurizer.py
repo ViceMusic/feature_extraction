@@ -14,6 +14,9 @@ from rdkit.Chem import (
     AllChem, QED, rdMolDescriptors, Crippen, Descriptors
 )
 
+import torch
+from transformers import AutoTokenizer, AutoModel
+
 # 尝试导入 Avalon 指纹支持（可选）
 try:
     from rdkit.Avalon import pyAvalonTools
@@ -21,6 +24,14 @@ try:
 except (ImportError, ModuleNotFoundError):
     pyAvalonTools = None
     _HAS_AVALON = False
+
+# 检查是否支持transformer和ChemBERTa
+# 尝试检查环境是否支持 Transformers
+try:
+    from transformers import AutoTokenizer, AutoModel
+    _HAS_TRANSFORMERS = True
+except (ImportError, ModuleNotFoundError):
+    _HAS_TRANSFORMERS = False
 
 logger = logging.getLogger(__name__)
 
@@ -46,7 +57,10 @@ class PeptideFeaturizer:
         self,
         morgan_bits: int = 1024,
         avalon_bits: int = 512,
+        chemberta_bits: int=384,
         use_avalon: bool = True,
+        use_chemberta: bool = False, # 新增：默认关闭，因为加载模型较慢
+        model_name: str = "deepchem/ChemBERTa-77M-MLM" # 新增：模型路径
     ) -> None:
         """
         初始化肽类特征提取器。
@@ -66,6 +80,18 @@ class PeptideFeaturizer:
                 "Avalon 指纹在此环境中不可用，已禁用。"
                 "若需使用，请确保 RDKit 编译时启用了 Avalon 支持。"
             )
+
+        # --- 新增 ChemBERTa 初始化 ---
+        self.use_chemberta = use_chemberta and _HAS_TRANSFORMERS
+        if self.use_chemberta:
+            logger.info(f"正在加载 ChemBERTa 模型: {model_name}...")
+            self.tokenizer = AutoTokenizer.from_pretrained(model_name)
+            self.model = AutoModel.from_pretrained(model_name)
+            self.model.eval() # 设置为评估模式
+            # 如果有 GPU，可以移动到 GPU
+            self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+            self.model.to(self.device)
+        # ---------------------------
 
     @staticmethod
     def _safe_float(value: any, default: float = 0.0) -> float:
@@ -245,6 +271,25 @@ class PeptideFeaturizer:
             logger.debug(f"计算 Avalon 指纹时出错: {e}")
             return [0.0] * self.avalon_bits
 
+    # --- 新增：ChemBERTa 特征提取私有方法(但是这里面完全没看到ChemBERTa相关的库啊) ---
+    def _chemberta_fingerprint(self, smiles: str) -> Optional[List[float]]:
+        if not self.use_chemberta:
+            return None
+        try:
+            inputs = self.tokenizer(smiles, return_tensors="pt", padding=True, truncation=True, max_length=512)
+            inputs = {k: v.to(self.device) for k, v in inputs.items()}
+            
+            with torch.no_grad():
+                outputs = self.model(**inputs)
+                # 取最后一层隐藏层所有 token 的平均值 (Mean Pooling)
+                embeddings = outputs.last_hidden_state.mean(dim=1).squeeze()
+                
+            return embeddings.cpu().numpy().tolist()
+        except Exception as e:
+            logger.debug(f"计算 ChemBERTa 特征时出错: {e}")
+            # 注意：ChemBERTa-77M 的维度通常是 384
+            return [0.0] * self.model.config.hidden_size
+
     def featurize(
         self, smiles: str
     ) -> Tuple[Optional[List[float]], bool]:
@@ -281,6 +326,12 @@ class PeptideFeaturizer:
                 avalon_feats = self._avalon_fingerprint(mol)
                 if avalon_feats is not None:
                     all_features.extend(avalon_feats)
+            
+            # --- 新增：整合 ChemBERTa ---
+            if self.use_chemberta:
+                berta_feats = self._chemberta_fingerprint(smiles)
+                if berta_feats is not None: 
+                    all_features.extend(berta_feats)
             
             return all_features, True
         
@@ -323,6 +374,11 @@ class PeptideFeaturizer:
         # Avalon 指纹名（如果启用）
         if self.use_avalon:
             names.extend([f"Avalon_{i}" for i in range(self.avalon_bits)])
+
+        # --- 新增：ChemBERTa 维度名称 ---
+        if self.use_chemberta:
+            hidden_size = self.model.config.hidden_size
+            names.extend([f"ChemBERTa_{i}" for i in range(hidden_size)])
         
         return names
 

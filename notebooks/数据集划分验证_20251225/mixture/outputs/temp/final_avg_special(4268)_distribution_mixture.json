@@ -1,0 +1,98 @@
+{
+    "metadata": {
+        "message": "special(4268)_distribution_mixture",
+        "timestamp": "2025-12-28 18:23:00",
+        "n_runs": 30,
+        "description": "Cross-Validation (CV) and Independent-Validation (IND) Average Metrics"
+    },
+    "results": {
+        "cv": {
+            "SIF_lr": {
+                "accuracy": 0.7124,
+                "precision": 0.5921,
+                "recall": 0.7168,
+                "f1": 0.6457,
+                "auc": 0.7952
+            },
+            "SIF_rf": {
+                "accuracy": 0.7063,
+                "precision": 0.602,
+                "recall": 0.6034,
+                "f1": 0.5992,
+                "auc": 0.7906
+            },
+            "SIF_xgb": {
+                "accuracy": 0.7073,
+                "precision": 0.6062,
+                "recall": 0.5931,
+                "f1": 0.5963,
+                "auc": 0.7933
+            },
+            "SGF_lr": {
+                "accuracy": 0.7887,
+                "precision": 0.6704,
+                "recall": 0.7489,
+                "f1": 0.7034,
+                "auc": 0.8632
+            },
+            "SGF_rf": {
+                "accuracy": 0.76,
+                "precision": 0.651,
+                "recall": 0.637,
+                "f1": 0.6386,
+                "auc": 0.8507
+            },
+            "SGF_xgb": {
+                "accuracy": 0.7397,
+                "precision": 0.6214,
+                "recall": 0.5961,
+                "f1": 0.604,
+                "auc": 0.8309
+            }
+        },
+        "ind": {
+            "SIF_lr": {
+                "accuracy": 0.8067,
+                "precision": 0.6,
+                "recall": 0.8438,
+                "f1": 0.7013,
+                "auc": 0.9212
+            },
+            "SIF_rf": {
+                "accuracy": 0.858,
+                "precision": 0.6891,
+                "recall": 0.8604,
+                "f1": 0.7652,
+                "auc": 0.9197
+            },
+            "SIF_xgb": {
+                "accuracy": 0.8739,
+                "precision": 0.7179,
+                "recall": 0.875,
+                "f1": 0.7887,
+                "auc": 0.9199
+            },
+            "SGF_lr": {
+                "accuracy": 0.8544,
+                "precision": 0.6207,
+                "recall": 0.8182,
+                "f1": 0.7059,
+                "auc": 0.9195
+            },
+            "SGF_rf": {
+                "accuracy": 0.9136,
+                "precision": 0.7476,
+                "recall": 0.9,
+                "f1": 0.8166,
+                "auc": 0.9572
+            },
+            "SGF_xgb": {
+                "accuracy": 0.8738,
+                "precision": 0.6552,
+                "recall": 0.8636,
+                "f1": 0.7451,
+                "auc": 0.9357
+            }
+        }
+    }
+}

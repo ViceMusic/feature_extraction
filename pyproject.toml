@@ -21,4 +21,7 @@ dependencies = [
     "jupyter>=1.1.1",
     "nbconvert>=7.16.6",
     "tqdm>=4.67.1",
+    "umap-learn>=0.5.4",
+    "numba>=0.57.0",
+    "llvmlite>=0.40.0",
 ]

@@ -1,0 +1,22 @@
+{
+  "train_dataset": "mixture_test_random77",
+  "test_dataset": "mixture_train_",
+  "target": "SGF",
+  "model": "rf",
+  "metrics": {
+    "accuracy": 0.84,
+    "precision": 0.7623762376237624,
+    "recall": 0.7623762376237624,
+    "f1": 0.7623762376237624,
+    "confusion_matrix": [
+      [
+        175,
+        24
+      ],
+      [
+        24,
+        77
+      ]
+    ]
+  }
+}

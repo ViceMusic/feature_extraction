@@ -1,0 +1,37 @@
+{
+  "dataset": "feature-engineering_train_Morgan(1024)_Avalon(512)_feature-engineering_test_Morgan(1024)_Avalon(512)",
+  "target": "SGF",
+  "model": "rf",
+  "fold": 1,
+  "metrics": {
+    "accuracy": [
+      0.8598130841121495
+    ],
+    "precision": [
+      0.6785714285714286
+    ],
+    "recall": [
+      0.76
+    ],
+    "f1": [
+      0.7169811320754716
+    ],
+    "auc": [
+      0.9212195121951221
+    ]
+  },
+  "mean_metrics": {
+    "accuracy": 0.8598130841121495,
+    "precision": 0.6785714285714286,
+    "recall": 0.76,
+    "f1": 0.7169811320754716,
+    "auc": 0.9212195121951221
+  },
+  "std_metrics": {
+    "accuracy": 0.0,
+    "precision": 0.0,
+    "recall": 0.0,
+    "f1": 0.0,
+    "auc": 0.0
+  }
+}

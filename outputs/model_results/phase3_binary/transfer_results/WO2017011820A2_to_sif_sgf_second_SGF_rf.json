@@ -4,14 +4,14 @@
   "target": "SGF",
   "model": "rf",
   "metrics": {
-    "accuracy": 0.0,
+    "accuracy": 0.10396039603960396,
     "precision": 0.0,
     "recall": 0.0,
     "f1": 0.0,
     "confusion_matrix": [
       [
-        0,
-        202
+        21,
+        181
       ],
       [
         0,

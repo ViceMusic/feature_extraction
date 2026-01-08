@@ -1,0 +1,37 @@
+{
+  "dataset": "mixture_train__mixture_test_",
+  "target": "SIF",
+  "model": "xgb",
+  "fold": 1,
+  "metrics": {
+    "accuracy": [
+      0.8739495798319328
+    ],
+    "precision": [
+      0.717948717948718
+    ],
+    "recall": [
+      0.875
+    ],
+    "f1": [
+      0.7887323943661971
+    ],
+    "auc": [
+      0.9198994252873562
+    ]
+  },
+  "mean_metrics": {
+    "accuracy": 0.8739495798319328,
+    "precision": 0.717948717948718,
+    "recall": 0.875,
+    "f1": 0.7887323943661971,
+    "auc": 0.9198994252873562
+  },
+  "std_metrics": {
+    "accuracy": 0.0,
+    "precision": 0.0,
+    "recall": 0.0,
+    "f1": 0.0,
+    "auc": 0.0
+  }
+}

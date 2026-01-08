@@ -1,0 +1,37 @@
+{
+  "dataset": "feature-engineering_train_Morgan(1024)_Avalon(512)_ChemBERTa(384)_feature-engineering_test_Morgan(1024)_Avalon(512)_ChemBERTa(384)",
+  "target": "SGF",
+  "model": "rf",
+  "fold": 1,
+  "metrics": {
+    "accuracy": [
+      0.8130841121495327
+    ],
+    "precision": [
+      0.6086956521739131
+    ],
+    "recall": [
+      0.56
+    ],
+    "f1": [
+      0.5833333333333334
+    ],
+    "auc": [
+      0.9004878048780488
+    ]
+  },
+  "mean_metrics": {
+    "accuracy": 0.8130841121495327,
+    "precision": 0.6086956521739131,
+    "recall": 0.56,
+    "f1": 0.5833333333333334,
+    "auc": 0.9004878048780488
+  },
+  "std_metrics": {
+    "accuracy": 0.0,
+    "precision": 0.0,
+    "recall": 0.0,
+    "f1": 0.0,
+    "auc": 0.0
+  }
+}
